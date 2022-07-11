@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>谈谈我对Reactive Programming的理解 - 为你编码</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="为你编码"><meta name="msapplication-TileImage" content="/img/me.jpeg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="为你编码"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="Microsoft于2012年的时候在.NET生态中实现了反应式扩展库，简称ReactiveX或Rx。跟着RxJava又开发了JVM上的实现。之后Pivotal、Netflix、LightBend和Twitter等厂商联合建立了Reactive Streams，并在2015-04-28发布1.0版本。并由Doug Lea通过JEP-266 More Concurrency Updates提案增加了"><meta property="og:type" content="blog"><meta property="og:title" content="谈谈我对Reactive Programming的理解"><meta property="og:url" content="http://example.com/2022/04/23/reactive/reactive_programming/"><meta property="og:site_name" content="为你编码"><meta property="og:description" content="Microsoft于2012年的时候在.NET生态中实现了反应式扩展库，简称ReactiveX或Rx。跟着RxJava又开发了JVM上的实现。之后Pivotal、Netflix、LightBend和Twitter等厂商联合建立了Reactive Streams，并在2015-04-28发布1.0版本。并由Doug Lea通过JEP-266 More Concurrency Updates提案增加了"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/img/og_image.png"><meta property="article:published_time" content="2022-04-23T00:00:00.000Z"><meta property="article:modified_time" content="2022-07-11T16:43:46.154Z"><meta property="article:author" content="echooymxq"><meta property="article:tag" content="reactive"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/04/23/reactive/reactive_programming/"},"headline":"谈谈我对Reactive Programming的理解","image":["http://example.com/img/og_image.png"],"datePublished":"2022-04-23T00:00:00.000Z","dateModified":"2022-07-11T16:43:46.154Z","author":{"@type":"Person","name":"echooymxq"},"publisher":{"@type":"Organization","name":"为你编码","logo":{"@type":"ImageObject","url":"http://example.com/img/me.jpeg"}},"description":"Microsoft于2012年的时候在.NET生态中实现了反应式扩展库，简称ReactiveX或Rx。跟着RxJava又开发了JVM上的实现。之后Pivotal、Netflix、LightBend和Twitter等厂商联合建立了Reactive Streams，并在2015-04-28发布1.0版本。并由Doug Lea通过JEP-266 More Concurrency Updates提案增加了"}</script><link rel="canonical" href="http://example.com/2022/04/23/reactive/reactive_programming/"><link rel="icon" href="/img/me.jpeg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-1-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/me.jpeg" alt="为你编码" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/archives">归档</a><a class="navbar-item" href="/categories">分类</a><a class="navbar-item" href="/tags">标签</a><a class="navbar-item" href="/about">关于</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="GitHub" href="https://github.com/echooymxq"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-12"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-04-23T00:00:00.000Z" title="4/23/2022, 12:00:00 AM">2022-04-23</time>发表</span><span class="level-item"><time dateTime="2022-07-11T16:43:46.154Z" title="7/11/2022, 4:43:46 PM">2022-07-11</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/reactive/">reactive</a></span><span class="level-item">12 分钟读完 (大约1753个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">谈谈我对Reactive Programming的理解</h1><div class="content"><p>Microsoft于2012年的时候在.NET生态中实现了反应式扩展库，简称ReactiveX或Rx。跟着RxJava又开发了JVM上的实现。之后Pivotal、Netflix、LightBend和Twitter等厂商联合建立了<a target="_blank" rel="noopener" href="https://www.reactive-streams.org/">Reactive Streams</a>，并在2015-04-28发布1.0版本。并由Doug Lea通过<a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/266">JEP-266 More Concurrency Updates</a>提案增加了Flow API包括了在JDK9中。</p>
+<p>或许以前你没怎么听说过<code>Reactive Programming</code>，但随着Spring5的发布，WebFlux、R2DBC、RSocket等各种名词层出不穷，Reactive相关的文章不断，基于国内主要使用Spring全家桶居多，一下子Reactive Programming成为热门技术，似乎是Spring将Reactive Programming带到了新高度，但其实主流的微服务框架Helidon、Micronaut、Quarkus和Vert.x等都支持Reactive Programming。</p>
+<h1 id="什么是Reactive-Programming"><a href="#什么是Reactive-Programming" class="headerlink" title="什么是Reactive Programming?"></a>什么是Reactive Programming?</h1><p>这是在最开始学习<code>Reactive Programming</code>（后文统称为反应式编程）的时候问得最多的问题了，根据维基百科的定义：</p>
+<blockquote>
+<p>反应式编程是一种面向数据流和变化传播的声明式编程范式。</p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Reactive_programming">https://en.wikipedia.org/wiki/Reactive_programming</a></p>
+</blockquote>
+<p>看完介绍可能还是难以理解具体什么是反应式编程，因为它没有更详细的定义描述，没有结合具体编程语言进行讲解，反应式编程解决了什么问题？我们为什么要使用反应式编程？带着这些问题，从我自己的角度谈谈对反应式编程的理解。</p>
+<p>首先反应式编程主要面向的是数据编程，而非面向逻辑编程。数据流在Java中对应<code>Stream</code>，涉及到流就会有过滤、转换、聚合和拆分，还有缓冲、调整流速率操作等等。变化传播类比观察者模式(<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Observer_pattern">Observer Pattern</a>)，当数据发生改变时，才会对其进行响应。另外变化传播也意味着异步非阻塞，Java使用Future表示异步任务结果，在获取执行结果时可能导致阻塞。而CompletableFuture能够真正的进行异步非阻塞操作，一旦任务完成触发回调执行下游方法，并可链接多个操作。</p>
+<p>那么我的理解就是在Java中反应式编程(<code>Reactive</code>) = 数据流(<code>Stream</code>) + 异步(<code>CompletableFuture</code>) + 背压(<code>BackPressure</code>)。我们没办法使用Java的Stream和CompletableFuture很好进行数据流的异步编程。首先Stream使用Iterator进行数据读取，虽然提供了<code>parallel</code>并行操作，但是其终止操作依旧是阻塞的。Stream的数据是静态的，无法动态生成，另外缺少部分高阶操作如缓冲、窗口等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">        .parallel()</span><br><span class="line">        .map(String::valueOf) <span class="comment">// paralleled</span></span><br><span class="line">        .collect(Collectors.toList()); <span class="comment">// blocked</span></span><br></pre></td></tr></table></figure>
+<p>CompletableFuture支持异步链式回调，并可指定Executor对应执行线程池，虽然提供了<code>allOf</code>方法，但无法对多个(流)异步操作进行组合处理。<code>anyOf</code>为当其中一个操作完成时结束，不能中断其它未完成的操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture</span><br><span class="line">        .allOf(f1, f2, ...)</span><br><span class="line">        .thenApply(tt -&gt; &#123;</span><br><span class="line">            <span class="comment">// where my result?</span></span><br><span class="line">            <span class="comment">// need result? </span></span><br><span class="line">            Object result1 = f1.join();</span><br><span class="line">            Object result2 = f2.join();</span><br><span class="line">        &#125;);</span><br><span class="line">CompletableFuture</span><br><span class="line">        .anyOf(f1, f2, ...)</span><br><span class="line">        .thenApply(tt -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (!f2.isDone()) &#123;</span><br><span class="line">                f2.cancel(<span class="keyword">true</span>); <span class="comment">// CompletableFuture cancel not working.</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>BackPressure指上游生产者的生产速率大于下游消费者的消费速率时的流控处理。一种是消费者根据自身能力使用Pull的方式进行数据获取；另一种则是生产者调整流控，当消费者来不及消费时，将数据进行缓冲、丢弃等。</p>
+<p>那么反应式编程解决了什么问题呢？我们为什么要使用反应式编程？我们以Tomcat为例，Tomcat默认采用一个请求一个线程的方式，假设配置的线程池大小为100，响应时间为100ms/r，那么系统的QPS能够达到1000r/s。假定在固定线程池大小不变的情况下，因为更多的线程意味着更多的上下文切换和内存消耗，如果因为一些阻塞操作如IO等导致线程阻塞，加大了响应时间，那么整体系统的QPS将降低。另外通常我们的业务系统的基本流程为<code>请求(解析Json) -&gt; 数据交换(Database) -&gt; 响应(组装Json)</code>，而我们可以使用反应式编程，把请求当作数据流，基于数据流，根据反应式编程框架提供的操作符，声明式的组装业务流程和逻辑，并且包含高阶的并发抽象，异步编程会更容易，更充分地利用系统资源。我们此处暂不论Servlet异步API，因为它同样面临上面提到的异步编程困境。</p>
+<p>反应式编程不是银弹，它的缺点？</p>
+<ul>
+<li>可维护性<br>代码的关注重点由以前的逻辑代码转为围绕反应式编程框架提供的操作符。</li>
+<li>排查异常困难<br>当代码出现异常时，异常堆栈可能全是操作符的嵌套调用，无法得知真正的异常位置，虽然部分反应式框架提供了调试工具，依旧加大了异常排查难度。</li>
+<li>编程难度<br>反应式编程异步非阻塞的特性，使得原来那些如同步监控指标统计或依赖线程上下文的操作都将不能工作，另外反应式编程通常和函数式编程结合，反应式框架本身就有一定的学习成本，降低开发效率。</li>
+</ul>
+<h1 id="Reactive-Programming和Reactive-System的区别？"><a href="#Reactive-Programming和Reactive-System的区别？" class="headerlink" title="Reactive Programming和Reactive System的区别？"></a>Reactive Programming和Reactive System的区别？</h1><ul>
+<li>Reactive Programming  </li>
+</ul>
+<p><code>Reactive Programming</code>是一种面向数据流的异步编程范式，通常应用在单个组件或者服务上。</p>
+<ul>
+<li>Reactive System  </li>
+</ul>
+<p><code>Reactive System</code> 则是系统级别的，比如分布式系统。<a target="_blank" rel="noopener" href="https://www.reactivemanifesto.org/">反应式宣言</a>描述了符合反应式系统的设计原则，其中包括Responsive、Resilient、Elastic和Message Driven几个特性。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Reactive Programming是非常有意思的，并且值得所有开发人员学习，但是你可以在工程上完全不使用Reactive Programming，这取决于你的系统能够从中获取什么，并承受相应带来的弊端。但是例如在一些负载均衡代理方面的应用，Reactive Programming有极大的优势，或者涉及到一些数据流编排，如多个微服务API链式调用，Reactive Programming能够很轻松的表达异步调用。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://www.reactive-streams.org/">https://www.reactive-streams.org/</a></li>
+<li><a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/266">http://openjdk.java.net/jeps/266</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Observer_pattern">https://en.wikipedia.org/wiki/Observer_pattern</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.reactivemanifesto.org/">https://www.reactivemanifesto.org/</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.reactive.foundation/">https://www.reactive.foundation/</a></li>
+</ul>
+</div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/reactive/">reactive</a></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2022/04/24/reactor/reactor/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">使用Reactor进行反应式编程(一)</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2022/04/15/tools/httpie/"><span class="level-item">我为什么会用httpie?</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><!--!--><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><p class="is-size-7"><span>&copy; 2022 echooymxq</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
